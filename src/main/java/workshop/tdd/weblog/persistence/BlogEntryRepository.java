@@ -24,14 +24,4 @@ public interface BlogEntryRepository extends CrudRepository<BlogEntryEntity, Lon
      */
     BlogEntryEntity findByEntryId(String entryId);
 
-    /**
-     * Retrieves all entries, sorted by publication date (descending).
-     *
-     * Uses a custom JPQL query.
-     *
-     * @return the entries as list or an empty list, if no entry exists.
-     */
-    @Query("select be from BlogEntryEntity be order by be.created desc")
-    List<BlogEntryEntity> findAllByCustomQuery();
-
 }

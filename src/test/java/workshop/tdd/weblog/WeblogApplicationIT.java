@@ -5,7 +5,7 @@ import static org.hamcrest.Matchers.*;
 
 import com.jayway.restassured.http.ContentType;
 import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
 import workshop.tdd.weblog.controller.ArticleRequest;
@@ -22,7 +22,7 @@ public class WeblogApplicationIT extends IntegrationBase {
 		basePath = "/articles";
 	}
 
-	@Test
+	@Ignore	@Test
 	public void getArticleSuccess() throws Exception {
 		given().pathParam("articleId", "is-tdd-dead")
 				.when()
@@ -33,7 +33,7 @@ public class WeblogApplicationIT extends IntegrationBase {
 					.body("title", equalTo("Is TDD Dead?"));
 	}
 
-	@Test
+	@Ignore @Test
 	public void getArticleFailsForUnknownId() throws Exception {
 		given().pathParam("articleId", "entry-does-not-exist")
 				.when()
@@ -42,7 +42,7 @@ public class WeblogApplicationIT extends IntegrationBase {
 					.statusCode(404);
 	}
 
-	@Test
+	@Ignore @Test
 	public void getArticlesSuccess() throws Exception {
 		when().get()
 				.then()
@@ -51,7 +51,7 @@ public class WeblogApplicationIT extends IntegrationBase {
 					.body("title", hasItems("Is TDD Dead?", "Explore capabilities, not features"));
 	}
 
-	@Test
+	@Ignore @Test
 	public void postArticleSuccess() throws Exception {
 		ArticleRequest request = new ArticleRequest("martin", "Brand new article", "Some heavy lifting ...");
 		given().contentType(ContentType.JSON).body(request)
@@ -62,7 +62,7 @@ public class WeblogApplicationIT extends IntegrationBase {
 					.header("Location", "http://localhost:" + port + "/articles/brand-new-article");
 	}
 
-	@Test
+	@Ignore @Test
 	public void postArticleFailsForUnknownAuthor() throws Exception {
 		ArticleRequest request = new ArticleRequest("johndoe", "Boring old article", "Some heavy lifting ...");
 		given().contentType(ContentType.JSON).body(request)
@@ -72,7 +72,7 @@ public class WeblogApplicationIT extends IntegrationBase {
 					.statusCode(403);
 	}
 
-	@Test
+	@Ignore @Test
 	public void postArticleFailsForDuplicateTitle() throws Exception {
 		ArticleRequest request = new ArticleRequest("martin", "Is TDD dead?", "Some heavy lifting ...");
 		given().contentType(ContentType.JSON).body(request)
@@ -82,7 +82,7 @@ public class WeblogApplicationIT extends IntegrationBase {
 					.statusCode(409);
 	}
 
-	@Test
+	@Ignore @Test
 	public void putArticleSuccess() throws Exception {
 		ArticleRequest request = new ArticleRequest("martin", "Spring forever", "Who needs Guice & Co.?");
 		given().pathParam("articleId", "the-dependency-injection-pattern")
@@ -97,7 +97,7 @@ public class WeblogApplicationIT extends IntegrationBase {
 					.body("title", is("Spring forever"));
 	}
 
-	@Test
+	@Ignore @Test
 	public void putArticleFailsForWrongAuthor() throws Exception {
 		ArticleRequest request = new ArticleRequest("kent", "Spring forever", "Who needs Guice & Co.?");
 		given().pathParam("articleId", "the-dependency-injection-pattern")
@@ -109,7 +109,7 @@ public class WeblogApplicationIT extends IntegrationBase {
 					.statusCode(403);
 	}
 
-	@Test
+	@Ignore @Test
 	public void putArticleFailsForUnknownId() throws Exception {
 		ArticleRequest request = new ArticleRequest("martin", "Spring forever", "Who needs Guice & Co.?");
 		given().pathParam("articleId", "some-made-up-id")
