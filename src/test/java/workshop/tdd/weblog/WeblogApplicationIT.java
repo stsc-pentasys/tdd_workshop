@@ -5,10 +5,9 @@ import static org.hamcrest.Matchers.*;
 
 import com.jayway.restassured.http.ContentType;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
-import workshop.tdd.weblog.controller.ArticleRequest;
+import workshop.tdd.weblog.resource.ArticleRequest;
 
 public class WeblogApplicationIT extends IntegrationBase {
 
