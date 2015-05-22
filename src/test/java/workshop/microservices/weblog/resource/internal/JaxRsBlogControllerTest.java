@@ -53,7 +53,7 @@ public class JaxRsBlogControllerTest {
     @Test
     public void getArticleCallsServiceAndReturns200() throws Exception {
         Article article = ArticleBuilder.defaultArticle().build();
-        when(blogServiceMock.findArticle(ARTICLE_ID)).thenReturn(Optional.of(article));
+        when(blogServiceMock.read(ARTICLE_ID)).thenReturn(Optional.of(article));
         Response response = getArticle();
         assertStatus(response, Status.OK);
         assertThat("Response body", ((ArticleResponse) response.getEntity()).getArticleId(), is(article.getArticleId()));
@@ -69,18 +69,18 @@ public class JaxRsBlogControllerTest {
 
     @Test
     public void getEntryReturns404IfEntryNotFound() throws Exception {
-        when(blogServiceMock.findArticle(ARTICLE_ID)).thenReturn(Optional.empty());
+        when(blogServiceMock.read(ARTICLE_ID)).thenReturn(Optional.empty());
         Response result = getArticle();
         assertStatus(result, Status.NOT_FOUND);
     }
 
     private void onGetArticleThrow(Exception exception) throws BlogServiceException {
-        when(blogServiceMock.findArticle(ARTICLE_ID)).thenThrow(exception);
+        when(blogServiceMock.read(ARTICLE_ID)).thenThrow(exception);
     }
 
     @Test
     public void postArticleReturns201AndLocation() throws Exception {
-        when(blogServiceMock.createNewArticle(NICK_NAME, TITLE, CONTENT))
+        when(blogServiceMock.publish(NICK_NAME, TITLE, CONTENT))
                 .thenReturn(ArticleBuilder.defaultArticle().build());
         expectURIConstruction();
         Response result = postNewArticle();
@@ -110,7 +110,7 @@ public class JaxRsBlogControllerTest {
     }
 
     private void onPostArticleThrow(Exception exception) throws BlogServiceException {
-        when(blogServiceMock.createNewArticle(NICK_NAME, TITLE, CONTENT))
+        when(blogServiceMock.publish(NICK_NAME, TITLE, CONTENT))
                 .thenThrow(exception);
     }
 
@@ -124,7 +124,7 @@ public class JaxRsBlogControllerTest {
     @Test
     public void getArticlesReturnsList() throws Exception {
         List<Article> articles = Arrays.asList(ArticleBuilder.defaultArticle().build());
-        when(blogServiceMock.findAllArticles()).thenReturn(articles);
+        when(blogServiceMock.index()).thenReturn(articles);
         expectURIConstruction();
         Response result = underTest.getArticles();
         assertStatus(result, Status.OK );
@@ -134,7 +134,7 @@ public class JaxRsBlogControllerTest {
     @Test
     public void getArticlesReturnsEmptyList() throws Exception {
         List<Article> articles = Collections.emptyList();
-        when(blogServiceMock.findAllArticles()).thenReturn(articles);
+        when(blogServiceMock.index()).thenReturn(articles);
         Response result = underTest.getArticles();
         assertStatus(result, Status.OK);
         assertThat("List size", ((List<ArticleListResponse>) result.getEntity()).size(), is(0));
@@ -144,7 +144,7 @@ public class JaxRsBlogControllerTest {
     @Test
     public void putArticleReturns200OnSuccess() throws Exception {
         Article article = ArticleBuilder.defaultArticle().withTitle(NEW_TITLE).andContent(NEW_CONTENT).build();
-        when(blogServiceMock.modifyArticle(article.getArticleId(), NICK_NAME, NEW_TITLE, NEW_CONTENT))
+        when(blogServiceMock.edit(article.getArticleId(), NICK_NAME, NEW_TITLE, NEW_CONTENT))
                 .thenReturn(Optional.of(article));
         Response result = underTest.putArticle(ARTICLE_ID, new ArticleRequest(NICK_NAME, NEW_TITLE, NEW_CONTENT));
         assertStatus(result, Status.OK);

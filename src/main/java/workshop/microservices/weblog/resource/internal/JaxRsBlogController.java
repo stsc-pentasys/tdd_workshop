@@ -47,7 +47,7 @@ public class JaxRsBlogController implements BlogController {
 
     @Override
     public Response getArticles() {
-        List<Article> articles = blogService.findAllArticles();
+        List<Article> articles = blogService.index();
         List<ArticleListResponse> views = createViewList(articles);
         return Response.ok(views).build();
     }
@@ -72,7 +72,7 @@ public class JaxRsBlogController implements BlogController {
 
     @Override
     public Response getArticle(String entryId) {
-        Optional<Article> entry = blogService.findArticle(entryId);
+        Optional<Article> entry = blogService.read(entryId);
         return entry.map(e -> Response.ok(createBlogEntryView(e)))
                 .orElse(Response.status(Status.NOT_FOUND)).build();
     }
@@ -104,7 +104,7 @@ public class JaxRsBlogController implements BlogController {
     }
 
     private ResponseBuilder postArticleResponse(ArticleRequest request) throws BlogServiceException {
-        Article entry = blogService.createNewArticle(
+        Article entry = blogService.publish(
                 request.getNickName(),
                 request.getTitle(),
                 request.getContent()
@@ -130,7 +130,7 @@ public class JaxRsBlogController implements BlogController {
     }
 
     private ResponseBuilder putArticleResponse(String entryId, ArticleRequest request) throws BlogServiceException {
-        Optional<Article> updated = blogService.modifyArticle(
+        Optional<Article> updated = blogService.edit(
                 entryId,
                 request.getNickName(),
                 request.getTitle(),

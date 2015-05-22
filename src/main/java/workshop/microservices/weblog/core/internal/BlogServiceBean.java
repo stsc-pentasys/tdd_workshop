@@ -13,7 +13,7 @@ import workshop.microservices.weblog.core.*;
  * Core service implementation.
  */
 @Service
-public class BlogServicePojo implements BlogService {
+public class BlogServiceBean implements BlogService {
 
     private ArticlePersistenceAdapter blogEntryAdapter;
 
@@ -41,7 +41,7 @@ public class BlogServicePojo implements BlogService {
      * @param idNormalizer
      */
     @Autowired
-    public BlogServicePojo(
+    public BlogServiceBean(
             ArticlePersistenceAdapter blogEntryAdapter,
             AuthorPersistenceAdapter authorAdapter,
             IdNormalizer idNormalizer) {
@@ -53,7 +53,7 @@ public class BlogServicePojo implements BlogService {
     /**
      * Test only.
      */
-    BlogServicePojo() {}
+    BlogServiceBean() {}
 
     /**
      * The NotificationAdapter is optional.
@@ -67,12 +67,12 @@ public class BlogServicePojo implements BlogService {
     }
 
     @Override
-    public List<Article> findAllArticles() {
+    public List<Article> index() {
         return blogEntryAdapter.findAll();
     }
 
     @Override
-    public Article createNewArticle(String nickName, String title, String content) {
+    public Article publish(String nickName, String title, String content) {
         verifyNotEmpty(nickName, title, content);
         Author author = verifyAuthor(nickName);
         String entryId = createUniqueId(title);
@@ -107,10 +107,10 @@ public class BlogServicePojo implements BlogService {
     }
 
     @Override
-    public Optional<Article> modifyArticle(String articleId, String nickName, String title, String content) {
-        verifyNotEmpty(nickName, title, content);
-        Optional<Article> published = findArticle(articleId);
-        return published.map(a -> executeUpdate(a, nickName, title, content));
+    public Optional<Article> edit(String articleId, String editor, String title, String content) {
+        verifyNotEmpty(editor, title, content);
+        Optional<Article> published = read(articleId);
+        return published.map(a -> executeUpdate(a, editor, title, content));
     }
 
     private Article executeUpdate(Article published, String nickName, String title, String content) {
@@ -122,7 +122,7 @@ public class BlogServicePojo implements BlogService {
     }
 
     @Override
-    public Optional<Article> findArticle(String articleId) {
+    public Optional<Article> read(String articleId) {
         return blogEntryAdapter.findById(articleId);
     }
 

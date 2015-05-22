@@ -19,13 +19,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 import workshop.microservices.weblog.core.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class BlogServicePojoTest {
+public class BlogServiceBeanTest {
 
     public static final String NEW_TITLE = "New title";
     public static final String NEW_CONTENT = "New content";
 
     @InjectMocks
-    private BlogService underTest = new BlogServicePojo();
+    private BlogService underTest = new BlogServiceBean();
 
     @Mock
     private ArticlePersistenceAdapter articlePersistenceAdapterMock;
@@ -43,64 +43,64 @@ public class BlogServicePojoTest {
     private ArgumentCaptor<Article> articleCaptor;
 
     @Test
-    public void findArticlePassesFoundArticle() throws Exception {
+    public void readPassesFoundArticle() throws Exception {
         Article entry = ArticleBuilder.defaultArticle().build();
         when(articlePersistenceAdapterMock.findById(ARTICLE_ID)).thenReturn(Optional.of(entry));
-        Optional<Article> result = underTest.findArticle(ARTICLE_ID);
+        Optional<Article> result = underTest.read(ARTICLE_ID);
         assertThat("Blog entry", result.get(), sameInstance(entry));
     }
 
     @Test
-    public void findArticleThrowsExceptionOnMissingEntry() throws Exception {
+    public void readThrowsExceptionOnMissingEntry() throws Exception {
         when(articlePersistenceAdapterMock.findById(ARTICLE_ID)).thenReturn(Optional.empty());
-        Optional<Article> result = underTest.findArticle(ARTICLE_ID);
+        Optional<Article> result = underTest.read(ARTICLE_ID);
         assertThat("Article", result.isPresent(), is(false));
     }
 
     @Test
-    public void findAllArticlesReturnsUnmodifiedList() throws Exception {
+    public void indexReturnsUnmodifiedList() throws Exception {
         // unmodifiable by definition
         List<Article> articles = Collections.emptyList();
         when(articlePersistenceAdapterMock.findAll()).thenReturn(articles);
-        List<Article> result = underTest.findAllArticles();
+        List<Article> result = underTest.index();
         assertThat("Article list", result, sameInstance(articles));
     }
 
     @Test
-    public void createNewArticleSuccess() throws Exception {
+    public void publishSuccess() throws Exception {
         when(authorPersistenceAdapterMock.findById(NICK_NAME))
                 .thenReturn(Optional.of(AuthorBuilder.defaultAuthor().build()));
         when(idNormalizerMock.normalizeTitle(TITLE)).thenReturn(ARTICLE_ID);
         when(articlePersistenceAdapterMock.findById(ARTICLE_ID)).thenReturn(Optional.empty());
 
-        Article result = underTest.createNewArticle(NICK_NAME, TITLE, CONTENT);
+        Article result = underTest.publish(NICK_NAME, TITLE, CONTENT);
 
         assertThat("Article id", result.getArticleId(), is(ARTICLE_ID));
         verify(notificationAdapterMock).created(result);
     }
 
     @Test(expected = UnknownAuthorException.class)
-    public void createNewArticleFailsForUnknownAuthor() throws Exception {
+    public void publishFailsForUnknownAuthor() throws Exception {
         when(authorPersistenceAdapterMock.findById(NICK_NAME)).thenReturn(Optional.empty());
-        underTest.createNewArticle(NICK_NAME, TITLE, CONTENT);
+        underTest.publish(NICK_NAME, TITLE, CONTENT);
     }
 
     @Test(expected = ArticleAlreadyExistsException.class)
-    public void createNewArticleFailsForDuplicateId() throws Exception {
+    public void publishFailsForDuplicateId() throws Exception {
         when(authorPersistenceAdapterMock.findById(NICK_NAME))
                 .thenReturn(Optional.of(AuthorBuilder.defaultAuthor().build()));
         when(idNormalizerMock.normalizeTitle(TITLE)).thenReturn(ARTICLE_ID);
         when(articlePersistenceAdapterMock.findById(ARTICLE_ID))
                 .thenReturn(Optional.of(ArticleBuilder.defaultArticle().build()));
-        underTest.createNewArticle(NICK_NAME, TITLE, CONTENT);
+        underTest.publish(NICK_NAME, TITLE, CONTENT);
     }
 
     @Test
-    public void modifyArticleSucceeds() throws Exception {
+    public void editSucceeds() throws Exception {
         Article article = ArticleBuilder.defaultArticle().build();
         when(articlePersistenceAdapterMock.findById(ARTICLE_ID)).thenReturn(Optional.of(article));
 
-        Optional<Article> result = underTest.modifyArticle(ARTICLE_ID, NICK_NAME, NEW_TITLE, NEW_CONTENT);
+        Optional<Article> result = underTest.edit(ARTICLE_ID, NICK_NAME, NEW_TITLE, NEW_CONTENT);
 
         verify(articlePersistenceAdapterMock).update(articleCaptor.capture());
         Article updated = articleCaptor.getValue();
@@ -110,16 +110,16 @@ public class BlogServicePojoTest {
     }
 
     @Test(expected = WrongAuthorException.class)
-    public void modifyArticleFailsForWrongNickName() throws Exception {
+    public void editFailsForWrongNickName() throws Exception {
         Article article = ArticleBuilder.defaultArticle().build();
         when(articlePersistenceAdapterMock.findById(ARTICLE_ID)).thenReturn(Optional.of(article));
-        underTest.modifyArticle(ARTICLE_ID, "intruder", NEW_TITLE, NEW_CONTENT);
+        underTest.edit(ARTICLE_ID, "intruder", NEW_TITLE, NEW_CONTENT);
     }
 
     @Test
-    public void modifyArticleFailsForUnknownId() throws Exception {
+    public void editFailsForUnknownId() throws Exception {
         when(articlePersistenceAdapterMock.findById(ARTICLE_ID)).thenReturn(Optional.empty());
-        Optional<Article> result =underTest.modifyArticle(ARTICLE_ID, NICK_NAME, NEW_TITLE, NEW_CONTENT);
+        Optional<Article> result =underTest.edit(ARTICLE_ID, NICK_NAME, NEW_TITLE, NEW_CONTENT);
         assertThat("Article", result.isPresent(), is(false));
     }
 }
