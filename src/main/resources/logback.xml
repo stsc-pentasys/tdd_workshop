@@ -13,7 +13,7 @@
         </encoder>
     </appender>
 
-    <logger name="workshop.tdd.weblog.BusinessNotification" additivity="false">
+    <logger name="workshop.microservices.weblog.BusinessNotification" additivity="false">
         <appender-ref ref="BUSINESS" />
     </logger>
 

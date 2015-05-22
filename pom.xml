@@ -8,16 +8,16 @@
 		<version>1.2.3.RELEASE</version>
 	</parent>
 
-	<groupId>workshop.tdd</groupId>
+	<groupId>workshop.microservices</groupId>
 	<artifactId>spring-weblog</artifactId>
 	<version>0.1.0-SNAPSHOT</version>
 
-	<name>Workshop::TDD::Weblog</name>
-	<description>Test-driven weblog example using Spring Boot</description>
+	<name>Workshop::Microservices::Weblog</name>
+	<description>Weblog microservice using Spring Boot</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<start-class>workshop.tdd.weblog.WeblogApplication</start-class>
+		<start-class>workshop.microservices.weblog.WeblogApplication</start-class>
 		<java.version>1.8</java.version>
 		<restassured.version>2.4.0</restassured.version>
 		<commons.lang3.version>3.3.2</commons.lang3.version>
