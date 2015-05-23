@@ -2,7 +2,6 @@ package workshop.microservices.weblog.persistence.internal;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,9 +54,9 @@ public class JpaArticlePersistenceAdapter implements ArticlePersistenceAdapter {
     }
 
     @Override
-    public Optional<Article> findById(String entryId) {
+    public Article findById(String entryId) {
         BlogEntryEntity entity = blogEntryRepository.findByEntryId(entryId);
-        return Optional.ofNullable(entity).map(blogEntryEntityMapper::map);
+        return blogEntryEntityMapper.map(entity);
     }
 
     @Override

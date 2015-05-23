@@ -21,7 +21,7 @@ public interface ArticlePersistenceAdapter {
      * @param entryId the article's id
      * @return the article or null, if not found
      */
-    Optional<Article> findById(String entryId);
+    Article findById(String entryId);
 
     /**
      * Publishes a new article to the repository.

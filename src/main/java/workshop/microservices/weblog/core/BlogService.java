@@ -1,7 +1,6 @@
 package workshop.microservices.weblog.core;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Core service API.
@@ -14,7 +13,7 @@ public interface BlogService {
      *
      * @return a list of articles, or an empty list
      */
-    List<Article> index();
+    List<Article> index() throws BlogServiceException;
 
     /**
      * Retrieve a single article from the underlying datastore.
@@ -22,7 +21,7 @@ public interface BlogService {
      * @param articleId the article's unique id
      * @return the corresponding article
      */
-    Optional<Article> read(String articleId);
+    Article read(String articleId) throws BlogServiceException;
 
     /**
      * Create a new article and save it to the underlying datastore.
@@ -32,7 +31,7 @@ public interface BlogService {
      * @param content the new article's content
      * @return the created Article
      */
-    Article publish(String author, String title, String content);
+    Article publish(String author, String title, String content) throws BlogServiceException;
 
     /**
      * Modify an existing article in the underlying datastore.
@@ -44,6 +43,6 @@ public interface BlogService {
      * @param content the article's new content
      * @return the modified article
      */
-    Optional<Article> edit(String articleId, String editor, String title, String content);
+    Article edit(String articleId, String editor, String title, String content) throws BlogServiceException;
 
 }

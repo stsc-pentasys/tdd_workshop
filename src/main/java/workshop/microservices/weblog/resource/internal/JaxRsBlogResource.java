@@ -13,6 +13,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import workshop.microservices.weblog.core.ArticleNotFoundException;
 import workshop.microservices.weblog.resource.ArticleListResponse;
 import workshop.microservices.weblog.resource.ArticleRequest;
 import workshop.microservices.weblog.resource.ArticleResponse;
@@ -47,9 +48,13 @@ public class JaxRsBlogResource implements BlogResource {
 
     @Override
     public Response getAll() {
-        List<Article> articles = blogService.index();
-        List<ArticleListResponse> views = createViewList(articles);
-        return Response.ok(views).build();
+        try {
+            List<Article> articles = blogService.index();
+            List<ArticleListResponse> views = createViewList(articles);
+            return Response.ok(views).build();
+        } catch (BlogServiceException e) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     private List<ArticleListResponse> createViewList(List<Article> articles) {
@@ -72,9 +77,14 @@ public class JaxRsBlogResource implements BlogResource {
 
     @Override
     public Response getOne(String entryId) {
-        Optional<Article> entry = blogService.read(entryId);
-        return entry.map(e -> Response.ok(createBlogEntryView(e)))
-                .orElse(Response.status(Status.NOT_FOUND)).build();
+        try {
+            Article entry = blogService.read(entryId);
+            return Response.ok(createBlogEntryView(entry)).build();
+        } catch (ArticleNotFoundException e) {
+            return Response.status(Status.NOT_FOUND).build();
+        } catch (BlogServiceException e) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     private ArticleResponse createBlogEntryView(Article entry) {
@@ -120,7 +130,9 @@ public class JaxRsBlogResource implements BlogResource {
     public Response putExisting(String entryId, ArticleRequest request) {
         ResponseBuilder response;
         try {
-            response = putArticleResponse(entryId, request);
+            response = Response.ok(putArticleResponse(entryId, request));
+        } catch (ArticleNotFoundException e) {
+            response = errorResponse(e, Status.NOT_FOUND);
         } catch (WrongAuthorException e) {
             response = errorResponse(e, Status.FORBIDDEN);
         } catch (BlogServiceException e) {
@@ -129,16 +141,13 @@ public class JaxRsBlogResource implements BlogResource {
         return response.build();
     }
 
-    private ResponseBuilder putArticleResponse(String entryId, ArticleRequest request) throws BlogServiceException {
-        Optional<Article> updated = blogService.edit(
+    private Article putArticleResponse(String entryId, ArticleRequest request) throws BlogServiceException {
+        return blogService.edit(
                 entryId,
                 request.getNickName(),
                 request.getTitle(),
                 request.getContent()
         );
-
-        return updated.map(e -> Response.ok(createBlogEntryView(e)))
-                .orElse(Response.status(Status.NOT_FOUND));
     }
 
 }

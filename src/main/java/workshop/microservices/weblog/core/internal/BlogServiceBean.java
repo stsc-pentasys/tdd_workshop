@@ -15,9 +15,9 @@ import workshop.microservices.weblog.core.*;
 @Service
 public class BlogServiceBean implements BlogService {
 
-    private ArticlePersistenceAdapter blogEntryAdapter;
+    private ArticlePersistenceAdapter articlePersistenceAdapter;
 
-    private AuthorPersistenceAdapter authorAdapter;
+    private AuthorPersistenceAdapter authorPersistenceAdapter;
 
     private IdNormalizer idNormalizer;
 
@@ -36,17 +36,17 @@ public class BlogServiceBean implements BlogService {
     /**
      * Set mandatory dependencies only.
      *
-     * @param blogEntryAdapter
-     * @param authorAdapter
+     * @param articlePersistenceAdapter
+     * @param authorPersistenceAdapter
      * @param idNormalizer
      */
     @Autowired
     public BlogServiceBean(
-            ArticlePersistenceAdapter blogEntryAdapter,
-            AuthorPersistenceAdapter authorAdapter,
+            ArticlePersistenceAdapter articlePersistenceAdapter,
+            AuthorPersistenceAdapter authorPersistenceAdapter,
             IdNormalizer idNormalizer) {
-        this.blogEntryAdapter = blogEntryAdapter;
-        this.authorAdapter = authorAdapter;
+        this.articlePersistenceAdapter = articlePersistenceAdapter;
+        this.authorPersistenceAdapter = authorPersistenceAdapter;
         this.idNormalizer = idNormalizer;
     }
 
@@ -67,17 +67,17 @@ public class BlogServiceBean implements BlogService {
     }
 
     @Override
-    public List<Article> index() {
-        return blogEntryAdapter.findAll();
+    public List<Article> index() throws BlogServiceException {
+        return articlePersistenceAdapter.findAll();
     }
 
     @Override
-    public Article publish(String nickName, String title, String content) {
+    public Article publish(String nickName, String title, String content) throws BlogServiceException {
         verifyNotEmpty(nickName, title, content);
         Author author = verifyAuthor(nickName);
         String entryId = createUniqueId(title);
         Article newEntry = new Article(entryId, title, content, author, now());
-        blogEntryAdapter.save(newEntry);
+        articlePersistenceAdapter.save(newEntry);
         notificationAdapter.created(newEntry);
         return newEntry;
     }
@@ -89,14 +89,14 @@ public class BlogServiceBean implements BlogService {
     }
 
     private Author verifyAuthor(String nickName) throws UnknownAuthorException {
-        Optional<Author> author = authorAdapter.findById(nickName);
+        Optional<Author> author = authorPersistenceAdapter.findById(nickName);
         return author.orElseThrow(() -> new UnknownAuthorException("No author found with id " + nickName));
     }
 
     private String createUniqueId(String title) throws ArticleAlreadyExistsException {
         String normalized = idNormalizer.normalizeTitle(title);
-        Optional<Article> article = blogEntryAdapter.findById(normalized);
-        if (article.isPresent()) {
+        Article article = articlePersistenceAdapter.findById(normalized);
+        if (article != null) {
             throw new ArticleAlreadyExistsException("An entry with id '" + normalized + "' already exists");
         }
         return normalized;
@@ -107,23 +107,29 @@ public class BlogServiceBean implements BlogService {
     }
 
     @Override
-    public Optional<Article> edit(String articleId, String editor, String title, String content) {
+    public Article edit(String articleId, String editor, String title, String content) throws BlogServiceException {
         verifyNotEmpty(editor, title, content);
-        Optional<Article> published = read(articleId);
-        return published.map(a -> executeUpdate(a, editor, title, content));
+        Article published = read(articleId);
+        return executeUpdate(published, editor, title, content);
     }
 
-    private Article executeUpdate(Article published, String nickName, String title, String content) {
+    private Article executeUpdate(Article published, String nickName, String title, String content)
+            throws WrongAuthorException{
         verifySameAuthor(published, nickName);
         Article updated = new Article(published, title, content);
-        blogEntryAdapter.update(updated);
+        articlePersistenceAdapter.update(updated);
         notificationAdapter.edited(updated);
         return updated;
     }
 
     @Override
-    public Optional<Article> read(String articleId) {
-        return blogEntryAdapter.findById(articleId);
+    public Article read(String articleId) throws BlogServiceException {
+        Article article = articlePersistenceAdapter.findById(articleId);
+        if (article != null) {
+            return article;
+        } else {
+            throw new ArticleNotFoundException("Article not found: " +  articleId);
+        }
     }
 
     private void verifySameAuthor(Article published, String nickName) throws WrongAuthorException {
