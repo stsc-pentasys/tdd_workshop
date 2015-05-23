@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 import workshop.microservices.weblog.resource.ArticleListResponse;
 import workshop.microservices.weblog.resource.ArticleRequest;
 import workshop.microservices.weblog.resource.ArticleResponse;
-import workshop.microservices.weblog.resource.BlogController;
+import workshop.microservices.weblog.resource.BlogResource;
 import workshop.microservices.weblog.core.Article;
 import workshop.microservices.weblog.core.ArticleAlreadyExistsException;
 import workshop.microservices.weblog.core.BlogService;
@@ -28,7 +28,7 @@ import workshop.microservices.weblog.core.WrongAuthorException;
  * REST API implementation.
  */
 @Component
-public class JaxRsBlogController implements BlogController {
+public class JaxRsBlogResource implements BlogResource {
 
     // NOT on setter Method - not supported by Jersey/Spring integration
     @Autowired
@@ -46,7 +46,7 @@ public class JaxRsBlogController implements BlogController {
     }
 
     @Override
-    public Response getArticles() {
+    public Response getAll() {
         List<Article> articles = blogService.index();
         List<ArticleListResponse> views = createViewList(articles);
         return Response.ok(views).build();
@@ -71,7 +71,7 @@ public class JaxRsBlogController implements BlogController {
     }
 
     @Override
-    public Response getArticle(String entryId) {
+    public Response getOne(String entryId) {
         Optional<Article> entry = blogService.read(entryId);
         return entry.map(e -> Response.ok(createBlogEntryView(e)))
                 .orElse(Response.status(Status.NOT_FOUND)).build();
@@ -89,7 +89,7 @@ public class JaxRsBlogController implements BlogController {
     }
 
     @Override
-    public Response postArticle(ArticleRequest request) {
+    public Response postNew(ArticleRequest request) {
         ResponseBuilder response;
         try {
             response = postArticleResponse(request);
@@ -117,7 +117,7 @@ public class JaxRsBlogController implements BlogController {
     }
 
     @Override
-    public Response putArticle(String entryId, ArticleRequest request) {
+    public Response putExisting(String entryId, ArticleRequest request) {
         ResponseBuilder response;
         try {
             response = putArticleResponse(entryId, request);

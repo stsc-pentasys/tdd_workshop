@@ -14,7 +14,7 @@ import javax.ws.rs.core.Response;
  * Weblog micro-service REST API.
  */
 @Path("/articles")
-public interface BlogController {
+public interface BlogResource {
 
     /**
      * Retrieve all articles.
@@ -23,7 +23,7 @@ public interface BlogController {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    Response getArticles();
+    Response getAll();
 
     /**
      * Retrieve a single blog-entry identified by it's normalized title.
@@ -34,7 +34,7 @@ public interface BlogController {
     @GET
     @Path("{articleId}")
     @Produces(MediaType.APPLICATION_JSON)
-    Response getArticle(@PathParam("articleId") String entryId);
+    Response getOne(@PathParam("articleId") String entryId);
 
     /**
      * Create a new entry. Returns the entry's URI as <i>Location</i> header.
@@ -45,7 +45,7 @@ public interface BlogController {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    Response postArticle(ArticleRequest request);
+    Response postNew(ArticleRequest request);
 
     /**
      * Modify an existing article, identified by its unique id.
@@ -58,5 +58,5 @@ public interface BlogController {
     @Path("{articleId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    Response putArticle(@PathParam("articleId") String entryId, ArticleRequest request);
+    Response putExisting(@PathParam("articleId") String entryId, ArticleRequest request);
 }

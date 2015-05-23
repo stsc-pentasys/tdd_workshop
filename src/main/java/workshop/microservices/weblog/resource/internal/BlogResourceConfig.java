@@ -12,6 +12,6 @@ public class BlogResourceConfig extends ResourceConfig {
      * Add all Jersey managed resources.
      */
     public BlogResourceConfig() {
-        register(JaxRsBlogController.class);
+        register(JaxRsBlogResource.class);
     }
 }
