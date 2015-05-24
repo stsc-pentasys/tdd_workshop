@@ -141,13 +141,14 @@ public class JaxRsBlogResource implements BlogResource {
         return response.build();
     }
 
-    private Article putArticleResponse(String entryId, ArticleRequest request) throws BlogServiceException {
-        return blogService.edit(
+    private ArticleResponse putArticleResponse(String entryId, ArticleRequest request) throws BlogServiceException {
+        Article article = blogService.edit(
                 entryId,
                 request.getNickName(),
                 request.getTitle(),
                 request.getContent()
         );
+        return createBlogEntryView(article);
     }
 
 }

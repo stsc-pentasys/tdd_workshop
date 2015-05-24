@@ -8,7 +8,6 @@ import static workshop.microservices.weblog.TestData.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,19 +48,18 @@ public class JpaArticlePersistenceAdapterTest {
         Article entry = ArticleBuilder.defaultArticle().build();
         when(blogEntryEntityMapperMock.map(entity)).thenReturn(entry);
 
-        Optional<Article> result = underTest.findById(ARTICLE_ID);
+        Article result = underTest.findById(ARTICLE_ID);
 
-        assertThat("Blog entry", result.get(), sameInstance(entry));
+        assertThat("Blog entry", result, sameInstance(entry));
     }
 
     @Test
     public void findByIdDoesNotMapIfNoEntryFound() throws Exception {
         when(blogEntryRepositoryMock.findByEntryId(ARTICLE_ID)).thenReturn(null);
 
-        Optional<Article> result = underTest.findById(ARTICLE_ID);
+        Article result = underTest.findById(ARTICLE_ID);
 
-        assertThat("Blog entry", result.isPresent(), is(false));
-        verifyZeroInteractions(blogEntryEntityMapperMock);
+        assertThat("Blog entry", result, is(nullValue()));
     }
 
     @Test

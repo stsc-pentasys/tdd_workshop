@@ -45,21 +45,19 @@ public class BlogServiceBeanTest {
     @Test
     public void readPassesFoundArticle() throws Exception {
         Article entry = ArticleBuilder.defaultArticle().build();
-        when(articlePersistenceAdapterMock.findById(ARTICLE_ID)).thenReturn(Optional.of(entry));
-        Optional<Article> result = underTest.read(ARTICLE_ID);
-        assertThat("Blog entry", result.get(), sameInstance(entry));
+        when(articlePersistenceAdapterMock.findById(ARTICLE_ID)).thenReturn(entry);
+        Article result = underTest.read(ARTICLE_ID);
+        assertThat("Blog entry", result, sameInstance(entry));
     }
 
-    @Test
+    @Test(expected = ArticleNotFoundException.class)
     public void readThrowsExceptionOnMissingEntry() throws Exception {
-        when(articlePersistenceAdapterMock.findById(ARTICLE_ID)).thenReturn(Optional.empty());
-        Optional<Article> result = underTest.read(ARTICLE_ID);
-        assertThat("Article", result.isPresent(), is(false));
+        when(articlePersistenceAdapterMock.findById(ARTICLE_ID)).thenReturn(null);
+        Article result = underTest.read(ARTICLE_ID);
     }
 
     @Test
     public void indexReturnsUnmodifiedList() throws Exception {
-        // unmodifiable by definition
         List<Article> articles = Collections.emptyList();
         when(articlePersistenceAdapterMock.findAll()).thenReturn(articles);
         List<Article> result = underTest.index();
@@ -71,7 +69,7 @@ public class BlogServiceBeanTest {
         when(authorPersistenceAdapterMock.findById(NICK_NAME))
                 .thenReturn(Optional.of(AuthorBuilder.defaultAuthor().build()));
         when(idNormalizerMock.normalizeTitle(TITLE)).thenReturn(ARTICLE_ID);
-        when(articlePersistenceAdapterMock.findById(ARTICLE_ID)).thenReturn(Optional.empty());
+        when(articlePersistenceAdapterMock.findById(ARTICLE_ID)).thenReturn(null);
 
         Article result = underTest.publish(NICK_NAME, TITLE, CONTENT);
 
@@ -91,35 +89,34 @@ public class BlogServiceBeanTest {
                 .thenReturn(Optional.of(AuthorBuilder.defaultAuthor().build()));
         when(idNormalizerMock.normalizeTitle(TITLE)).thenReturn(ARTICLE_ID);
         when(articlePersistenceAdapterMock.findById(ARTICLE_ID))
-                .thenReturn(Optional.of(ArticleBuilder.defaultArticle().build()));
+                .thenReturn(ArticleBuilder.defaultArticle().build());
         underTest.publish(NICK_NAME, TITLE, CONTENT);
     }
 
     @Test
     public void editSucceeds() throws Exception {
         Article article = ArticleBuilder.defaultArticle().build();
-        when(articlePersistenceAdapterMock.findById(ARTICLE_ID)).thenReturn(Optional.of(article));
+        when(articlePersistenceAdapterMock.findById(ARTICLE_ID)).thenReturn(article);
 
-        Optional<Article> result = underTest.edit(ARTICLE_ID, NICK_NAME, NEW_TITLE, NEW_CONTENT);
+        Article result = underTest.edit(ARTICLE_ID, NICK_NAME, NEW_TITLE, NEW_CONTENT);
 
         verify(articlePersistenceAdapterMock).update(articleCaptor.capture());
         Article updated = articleCaptor.getValue();
         assertThat("Title", updated.getTitle(), is(NEW_TITLE));
         assertThat("Content", updated.getContent(), is(NEW_CONTENT));
-        assertThat("Article", result.get(), sameInstance(updated));
+        assertThat("Article", result, sameInstance(updated));
     }
 
     @Test(expected = WrongAuthorException.class)
     public void editFailsForWrongNickName() throws Exception {
         Article article = ArticleBuilder.defaultArticle().build();
-        when(articlePersistenceAdapterMock.findById(ARTICLE_ID)).thenReturn(Optional.of(article));
+        when(articlePersistenceAdapterMock.findById(ARTICLE_ID)).thenReturn(article);
         underTest.edit(ARTICLE_ID, "intruder", NEW_TITLE, NEW_CONTENT);
     }
 
-    @Test
+    @Test(expected = ArticleNotFoundException.class)
     public void editFailsForUnknownId() throws Exception {
-        when(articlePersistenceAdapterMock.findById(ARTICLE_ID)).thenReturn(Optional.empty());
-        Optional<Article> result =underTest.edit(ARTICLE_ID, NICK_NAME, NEW_TITLE, NEW_CONTENT);
-        assertThat("Article", result.isPresent(), is(false));
+        when(articlePersistenceAdapterMock.findById(ARTICLE_ID)).thenReturn(null);
+        underTest.edit(ARTICLE_ID, NICK_NAME, NEW_TITLE, NEW_CONTENT);
     }
 }

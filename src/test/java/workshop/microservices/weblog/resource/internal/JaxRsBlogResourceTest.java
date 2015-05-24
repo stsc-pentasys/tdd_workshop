@@ -22,6 +22,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import workshop.microservices.weblog.core.ArticleNotFoundException;
 import workshop.microservices.weblog.resource.ArticleListResponse;
 import workshop.microservices.weblog.resource.ArticleRequest;
 import workshop.microservices.weblog.resource.ArticleResponse;
@@ -53,7 +54,7 @@ public class JaxRsBlogResourceTest {
     @Test
     public void getOneReturnsOk() throws Exception {
         Article article = ArticleBuilder.defaultArticle().build();
-        when(blogServiceMock.read(ARTICLE_ID)).thenReturn(Optional.of(article));
+        when(blogServiceMock.read(ARTICLE_ID)).thenReturn(article);
         Response response = getOne();
         assertStatus(response, Status.OK);
         assertThat("Response body", ((ArticleResponse) response.getEntity()).getArticleId(), is(article.getArticleId()));
@@ -69,7 +70,7 @@ public class JaxRsBlogResourceTest {
 
     @Test
     public void getOneReturnsNotFound() throws Exception {
-        when(blogServiceMock.read(ARTICLE_ID)).thenReturn(Optional.empty());
+        onGetArticleThrow(new ArticleNotFoundException("Not found!"));
         Response result = getOne();
         assertStatus(result, Status.NOT_FOUND);
     }
@@ -145,7 +146,7 @@ public class JaxRsBlogResourceTest {
     public void putExistingReturnsOk() throws Exception {
         Article article = ArticleBuilder.defaultArticle().withTitle(NEW_TITLE).andContent(NEW_CONTENT).build();
         when(blogServiceMock.edit(article.getArticleId(), NICK_NAME, NEW_TITLE, NEW_CONTENT))
-                .thenReturn(Optional.of(article));
+                .thenReturn(article);
         Response result = underTest.putExisting(ARTICLE_ID, new ArticleRequest(NICK_NAME, NEW_TITLE, NEW_CONTENT));
         assertStatus(result, Status.OK);
         ArticleResponse response = (ArticleResponse) result.getEntity();
