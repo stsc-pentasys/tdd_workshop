@@ -12,7 +12,7 @@ import workshop.microservices.weblog.core.IdNormalizer;
  * Implements string normalization.
  */
 @Component
-public class IdNormalizerPojo implements IdNormalizer {
+public class IdNormalizerBean implements IdNormalizer {
 
     /**
      * Replacements for german mutations.

@@ -1,7 +1,7 @@
 package workshop.microservices.weblog.core;
 
 /**
- * Created by schulzst on 23.05.2015.
+ * Thrown if referenced article is missing.
  */
 public class ArticleNotFoundException extends BlogServiceException {
 

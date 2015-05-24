@@ -5,7 +5,7 @@ import static org.hamcrest.Matchers.*;
 
 import org.junit.Test;
 
-public class IdNormalizerPojoTest {
+public class IdNormalizerBeanTest {
 
     private static final String SIMPLE_TITLE = "A simple title";
     private static final String SIMPLE_EXPECTED = "a-simple-title";
@@ -13,7 +13,7 @@ public class IdNormalizerPojoTest {
     private static final String COMPLEX_TITLE = "Ein Spaß mit Sönderzeichen; und Ümlauten?!";
     private static final String COMPLEX_EXPECTED = "ein-spass-mit-soenderzeichen-und-uemlauten";
 
-    private IdNormalizerPojo underTest = new IdNormalizerPojo();
+    private IdNormalizerBean underTest = new IdNormalizerBean();
 
     @Test
     public void normalizeSimple() throws Exception {
