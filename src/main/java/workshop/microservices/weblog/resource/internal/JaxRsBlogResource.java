@@ -53,7 +53,7 @@ public class JaxRsBlogResource implements BlogResource {
             List<ArticleListResponse> views = createViewList(articles);
             return Response.ok(views).build();
         } catch (BlogServiceException e) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            throw new TechnicalException();
         }
     }
 
@@ -81,9 +81,9 @@ public class JaxRsBlogResource implements BlogResource {
             Article entry = blogService.read(entryId);
             return Response.ok(createBlogEntryView(entry)).build();
         } catch (ArticleNotFoundException e) {
-            return Response.status(Status.NOT_FOUND).build();
+            throw new UnknownArticleIdException(entryId);
         } catch (BlogServiceException e) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            throw new TechnicalException();
         }
     }
 
@@ -100,17 +100,16 @@ public class JaxRsBlogResource implements BlogResource {
 
     @Override
     public Response postNew(ArticleRequest request) {
-        ResponseBuilder response;
         try {
-            response = postArticleResponse(request);
+            ResponseBuilder response = postArticleResponse(request);
+            return response.build();
         } catch (UnknownAuthorException e) {
-            response = errorResponse(e, Status.FORBIDDEN);
+            throw new NoAccessAllowedException(request.getNickName());
         } catch (ArticleAlreadyExistsException e) {
-            response = errorResponse(e, Status.CONFLICT);
+            throw new ArticleIdAlreadyInUseException(request.getTitle());
         } catch (BlogServiceException e) {
-            response = errorResponse(e, Status.INTERNAL_SERVER_ERROR);
+            throw new TechnicalException();
         }
-        return response.build();
     }
 
     private ResponseBuilder postArticleResponse(ArticleRequest request) throws BlogServiceException {
@@ -122,23 +121,18 @@ public class JaxRsBlogResource implements BlogResource {
         return Response.created(createUri(entry.getArticleId()));
     }
 
-    private ResponseBuilder errorResponse(BlogServiceException e, Status status) {
-        return Response.status(status).entity(new ErrorMessage(e.getMessage()));
-    }
-
     @Override
     public Response putExisting(String entryId, ArticleRequest request) {
-        ResponseBuilder response;
         try {
-            response = Response.ok(putArticleResponse(entryId, request));
+            ResponseBuilder response = Response.ok(putArticleResponse(entryId, request));
+            return response.build();
         } catch (ArticleNotFoundException e) {
-            response = errorResponse(e, Status.NOT_FOUND);
+            throw new UnknownArticleIdException(entryId);
         } catch (WrongAuthorException e) {
-            response = errorResponse(e, Status.FORBIDDEN);
+            throw new NoAccessAllowedException(request.getNickName());
         } catch (BlogServiceException e) {
-            response = errorResponse(e, Status.INTERNAL_SERVER_ERROR);
+            throw new TechnicalException();
         }
-        return response.build();
     }
 
     private ArticleResponse putArticleResponse(String entryId, ArticleRequest request) throws BlogServiceException {

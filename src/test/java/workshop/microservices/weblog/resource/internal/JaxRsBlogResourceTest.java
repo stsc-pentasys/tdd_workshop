@@ -68,11 +68,10 @@ public class JaxRsBlogResourceTest {
         assertThat("HTTP status code", response.getStatusInfo(), is(status));
     }
 
-    @Test
+    @Test(expected = UnknownArticleIdException.class)
     public void getOneReturnsNotFound() throws Exception {
         onGetArticleThrow(new ArticleNotFoundException("Not found!"));
-        Response result = getOne();
-        assertStatus(result, Status.NOT_FOUND);
+        getOne();
     }
 
     private void onGetArticleThrow(Exception exception) throws BlogServiceException {
@@ -103,11 +102,10 @@ public class JaxRsBlogResourceTest {
         return new ArticleRequest(NICK_NAME, TITLE, CONTENT);
     }
 
-    @Test
+    @Test(expected = NoAccessAllowedException.class)
     public void postReturnsReturnsForbidden() throws Exception {
         onPostNewThrow(new UnknownAuthorException("Test"));
-        Response result = postNew();
-        assertStatus(result, Status.FORBIDDEN);
+        postNew();
     }
 
     private void onPostNewThrow(Exception exception) throws BlogServiceException {
@@ -115,11 +113,10 @@ public class JaxRsBlogResourceTest {
                 .thenThrow(exception);
     }
 
-    @Test
+    @Test(expected = ArticleIdAlreadyInUseException.class)
     public void postNewReturnsConflict() throws Exception {
         onPostNewThrow(new ArticleAlreadyExistsException("Test"));
-        Response result = postNew();
-        assertStatus(result, Status.CONFLICT);
+        postNew();
     }
 
     @Test
